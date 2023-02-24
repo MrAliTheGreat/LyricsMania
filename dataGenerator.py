@@ -37,7 +37,7 @@ pageHTML = BeautifulSoup(requests.get(os.environ.get("BASE_URL") + f"/i/{artistN
 
 for songLink in pageHTML.find_all("div", class_ = "lf-list__row js-sort-table-content-item"):
     songHTML = BeautifulSoup(requests.get(os.environ.get("BASE_URL") + songLink.a.get("href")).text, features = "lxml")
-    songName = songHTML.find("a", class_ = "song-page-conthead-link").parent.text.split("\u2013")[-1].replace("Lyrics", "").strip()
+    songName = songHTML.find("a", class_ = "song-page-conthead-link").parent.text.split("\u2013")[-1].replace("Lyrics", "").strip().encode("ascii", "ignore").decode("utf-8")
     lyrics = songHTML.find(id = "content").text.strip()
     lyrics = cleanUpLyrics(lyrics)
     with open(f"./Dataset/{artistName}/{songName}.txt", mode = "w") as songFile:

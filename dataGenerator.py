@@ -34,12 +34,16 @@ print(f"\nFetching new data for {artistName}...")
 
 artistNameURL = "+".join(artistName.split(" "))
 pageHTML = BeautifulSoup(requests.get(os.environ.get("BASE_URL") + f"/i/{artistNameURL}").text, features = "lxml")
+songLinksContainer = pageHTML.find("div", class_ = "lf-list__container js-sort-table-container")
 
-for songLink in pageHTML.find_all("div", class_ = "lf-list__row js-sort-table-content-item"):
+for songLink in songLinksContainer.find_all("div", class_ = "lf-list__row js-sort-table-content-item"):
+    songName = songLink.a.text.encode("ascii", "ignore").decode("utf-8").replace("Lyrics", "").replace("?", "").strip()
+
     songHTML = BeautifulSoup(requests.get(os.environ.get("BASE_URL") + songLink.a.get("href")).text, features = "lxml")
-    songName = songHTML.find("a", class_ = "song-page-conthead-link").parent.text.split("\u2013")[-1].replace("Lyrics", "").strip().encode("ascii", "ignore").decode("utf-8")
-    lyrics = songHTML.find(id = "content").text.strip()
+
+    lyrics = songHTML.find(id = "content").text.encode("ascii", "ignore").decode("utf-8").strip()
     lyrics = cleanUpLyrics(lyrics)
+
     with open(f"./Dataset/{artistName}/{songName}.txt", mode = "w") as songFile:
         songFile.write(lyrics)
     print(f"{songName} by {artistName} was added to the dataset!")
